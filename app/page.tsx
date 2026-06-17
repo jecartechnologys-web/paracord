@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import Loader from '@/components/Loader'
 
 const Showroom = dynamic(() => import('@/components/ProductViewer'), { ssr: false })
 
-const SHOWROOM_COLORS = [
+const COLORS = [
   { name: 'Verde Militar', value: '#2a6e3f' },
   { name: 'Negro Táctico', value: '#1a1a1a' },
   { name: 'Azul Marino', value: '#1e3a5f' },
@@ -17,11 +17,26 @@ const SHOWROOM_COLORS = [
   { name: 'Cian Neón', value: '#00bbcc' },
 ]
 
+const WEAVES = [
+  { name: 'Cobra', desc: 'Nudo clásico entrelazado', era: 'Tradicional' },
+  { name: 'King Cobra', desc: 'Doble capa de grosor', era: 'Reforzado' },
+  { name: 'Dragon Scale', desc: 'Escamado decorativo', era: 'Premium' },
+  { name: 'Trident', desc: 'Tres cabos simétricos', era: 'Audaz' },
+  { name: 'Solomon Bar', desc: 'Tejido plano minimalista', era: 'Moderno' },
+  { name: 'Fishtail', desc: 'Trenzado fino elegante', era: 'Clásico' },
+]
+
 function HomePage() {
   const [loaded, setLoaded] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [activeWeave, setActiveWeave] = useState('Cobra')
+  const viewerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
+
+  const scrollToViewer = useCallback(() => {
+    viewerRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
 
   if (!mounted) return null
 
@@ -30,93 +45,103 @@ function HomePage() {
       {!loaded && <Loader onDone={() => setLoaded(true)} />}
 
       <div className={`showroom-page ${loaded ? 'visible' : ''}`}>
-        {/* Nav minimal */}
+        {/* NAV */}
         <nav className="sr-nav">
           <span className="sr-logo">⟐ PARACORD</span>
           <div className="sr-nav-links">
-            <span className="sr-nav-label">Showroom</span>
+            <button className="sr-nav-cta" onClick={scrollToViewer}>Explorar</button>
           </div>
         </nav>
 
-        {/* Hero — minimal, solo título */}
+        {/* HERO */}
         <section className="sr-hero">
+          <div className="sr-hero-bg" />
           <div className="sr-hero-content">
-            <span className="sr-badge">⋆⋆⋆ Artesanía en Paracord ⋆⋆⋆</span>
+            <div className="sr-hero-tag">Edición Limitada</div>
             <h1 className="sr-title">
               Tejido<br />
-              <span className="sr-gradient">Cobra</span>
+              <span className="sr-title-accent">Cobra</span>
             </h1>
-            <p className="sr-desc">
-              Cuerda militar 550 · Hecho a mano · Cada pieza es única
+            <p className="sr-subtitle">
+              Paracord 550 · Hecho a mano en México · Cada pieza es única
             </p>
+            <div className="sr-hero-actions">
+              <button className="sr-btn-primary" onClick={scrollToViewer}>
+                Ver en 3D
+              </button>
+            </div>
+          </div>
+          <div className="sr-hero-decor">
+            <div className="sr-hero-glow" />
           </div>
         </section>
 
-        {/* Showroom 3D — el corazón */}
-        <section className="sr-viewer-section" id="showroom">
-          <div className="sr-viewer-wrap">
-            <Showroom />
-          </div>
-        </section>
-
-        {/* Galería de colores sutil */}
-        <section className="sr-colors-section">
-          <div className="sr-colors-inner">
-            <h2 className="sr-section-title">Variantes</h2>
-            <p className="sr-section-desc">
-              Cada color disponible en todos los tejidos
-            </p>
-            <div className="sr-color-bar">
-              {SHOWROOM_COLORS.map((c) => (
-                <div
-                  key={c.value}
-                  className="sr-color-chip"
-                  title={c.name}
-                >
-                  <div
-                    className="sr-color-dot"
-                    style={{ backgroundColor: c.value }}
-                  />
-                  <span className="sr-color-name">{c.name}</span>
-                </div>
-              ))}
+        {/* SHOWROOM 3D */}
+        <section className="sr-viewer-section" id="viewer" ref={viewerRef}>
+          <div className="sr-viewer-container">
+            <div className="sr-viewer-header">
+              <h2 className="sr-section-title">Showroom</h2>
+              <p className="sr-section-desc">Arrastra para rotar · Pellizca para zoom</p>
+            </div>
+            <div className="sr-viewer-glass">
+              <Showroom />
             </div>
           </div>
         </section>
 
-        {/* Tejidos disponibles */}
+        {/* TEJIDOS */}
         <section className="sr-weaves-section">
           <div className="sr-weaves-inner">
+            <div className="sr-section-label">Catálogo</div>
             <h2 className="sr-section-title">Tejidos</h2>
-            <p className="sr-section-desc">
-              Técnicas artesanales tradicionales
-            </p>
-            <div className="sr-weave-grid">
-              {[
-                { name: 'Cobra', desc: 'El clásico. Nudo sencillo, limpio y resistente.' },
-                { name: 'King Cobra', desc: 'Doble capa. Mayor grosor y durabilidad.' },
-                { name: 'Dragon Scale', desc: 'Escamado decorativo. Textura única.' },
-                { name: 'Trident', desc: 'Tres cabos. Diseño audaz y simétrico.' },
-                { name: 'Solomon Bar', desc: 'Tejido plano. Ideal para diseños minimalistas.' },
-                { name: 'Fishtail', desc: 'Espina de pescado. Trenzado fino y elegante.' },
-              ].map((w) => (
-                <div key={w.name} className="sr-weave-card">
-                  <div className="sr-weave-visual">
-                    <div className="sr-weave-ring" />
+            <p className="sr-section-desc">Técnicas artesanales que definen cada pieza</p>
+            <div className="sr-weave-strip">
+              {WEAVES.map((w) => (
+                <button
+                  key={w.name}
+                  className={`sr-weave-tab ${activeWeave === w.name ? 'active' : ''}`}
+                  onClick={() => setActiveWeave(w.name === activeWeave ? '' : w.name)}
+                >
+                  <div className="sr-weave-icon">
+                    <div className={`sr-weave-ring style-${w.name.toLowerCase().replace(/\s+/g, '-')}`} />
                   </div>
-                  <h3 className="sr-weave-name">{w.name}</h3>
-                  <p className="sr-weave-desc">{w.desc}</p>
+                  <div className="sr-weave-info">
+                    <span className="sr-weave-name">{w.name}</span>
+                    <span className="sr-weave-era">{w.era}</span>
+                  </div>
+                  {activeWeave === w.name && (
+                    <p className="sr-weave-desc-reveal">{w.desc}</p>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COLORES */}
+        <section className="sr-colors-section">
+          <div className="sr-colors-inner">
+            <div className="sr-section-label">Paleta</div>
+            <h2 className="sr-section-title">Colores</h2>
+            <p className="sr-section-desc">Disponibles en todos los tejidos</p>
+            <div className="sr-color-grid">
+              {COLORS.map((c) => (
+                <div key={c.value} className="sr-color-item">
+                  <div className="sr-color-swatch" style={{ backgroundColor: c.value }} />
+                  <span className="sr-color-label">{c.name}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Footer mínimo */}
+        {/* FOOTER */}
         <footer className="sr-footer">
           <div className="sr-footer-inner">
-            <span className="sr-logo">⟐ PARACORD</span>
-            <p>Paracord 550 · Hecho a mano en México</p>
+            <div className="sr-footer-brand">
+              <span className="sr-logo">⟐ PARACORD</span>
+              <p className="sr-footer-tagline">Paracord 550 · Hecho a mano en México</p>
+            </div>
           </div>
         </footer>
       </div>
