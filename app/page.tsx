@@ -1,60 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import Loader from '@/components/Loader'
 
-const ProductViewer = dynamic(() => import('@/components/ProductViewer'), { ssr: false })
+const Showroom = dynamic(() => import('@/components/ProductViewer'), { ssr: false })
 
-const products = [
-  {
-    name: 'Cobra Clásica',
-    desc: 'Tejido cobra tradicional. Cuerda militar 550. Ajustable.',
-    price: '$149 MXN',
-    colors: 8,
-    popular: true,
-  },
-  {
-    name: 'Serpiente Rey',
-    desc: 'Tejido king cobra. Doble capa, más ancho y robusto.',
-    price: '$249 MXN',
-    colors: 6,
-    popular: false,
-  },
-  {
-    name: 'Dragon Escamas',
-    desc: 'Tejido dragon scale. Textura escamada premium.',
-    price: '$299 MXN',
-    colors: 4,
-    popular: false,
-  },
-  {
-    name: 'Trident',
-    desc: 'Tres colores trenzados. Diseño exclusivo por pedido.',
-    price: '$349 MXN',
-    colors: 12,
-    popular: false,
-  },
-  {
-    name: 'Pack Táctico',
-    desc: '3 pulseras: negra, militar y naranja. Cuerda 550.',
-    price: '$399 MXN',
-    colors: 1,
-    popular: true,
-  },
-  {
-    name: 'Edición Limitada',
-    desc: 'Tejido personalizado + grabado en hebilla. Única.',
-    price: '$499 MXN',
-    colors: 16,
-    popular: false,
-  },
+const SHOWROOM_COLORS = [
+  { name: 'Verde Militar', value: '#2a6e3f' },
+  { name: 'Negro Táctico', value: '#1a1a1a' },
+  { name: 'Azul Marino', value: '#1e3a5f' },
+  { name: 'Rojo Rubí', value: '#8b1a1a' },
+  { name: 'Naranja Caza', value: '#cc5500' },
+  { name: 'Morado Real', value: '#5a2d7a' },
+  { name: 'Arena', value: '#c4a882' },
+  { name: 'Cian Neón', value: '#00bbcc' },
 ]
 
 function HomePage() {
   const [loaded, setLoaded] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(0)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -64,94 +29,94 @@ function HomePage() {
     <>
       {!loaded && <Loader onDone={() => setLoaded(true)} />}
 
-      <div className={`app-container ${loaded ? 'visible' : ''}`}>
-        {/* NAV */}
-        <nav className="nav">
-          <div className="nav-inner">
-            <span className="logo">⟐ PARACORD</span>
-            <div className="nav-links">
-              <a href="#productos" className="nav-link">Productos</a>
-              <a href="#visor" className="nav-link">Visor 3D</a>
-              <a href="#contacto" className="nav-link">Contacto</a>
-            </div>
+      <div className={`showroom-page ${loaded ? 'visible' : ''}`}>
+        {/* Nav minimal */}
+        <nav className="sr-nav">
+          <span className="sr-logo">⟐ PARACORD</span>
+          <div className="sr-nav-links">
+            <span className="sr-nav-label">Showroom</span>
           </div>
         </nav>
 
-        {/* HERO */}
-        <section className="hero-alt" id="inicio">
-          <span className="hero-badge">✦ Hecho a mano en México</span>
-          <h1 className="hero-title">
-            Paracord<br />
-            <span className="hero-gradient">Artisan</span>
-          </h1>
-          <p className="hero-sub">
-            Pulseras artesanales con cuerda militar 550.<br />
-            Cada pieza es única. Explora cada ángulo.
-          </p>
-          <div className="hero-actions">
-            <a href="#visor" className="btn-primary">Explorar en 3D</a>
-            <a href="#productos" className="btn-secondary">Ver modelos</a>
+        {/* Hero — minimal, solo título */}
+        <section className="sr-hero">
+          <div className="sr-hero-content">
+            <span className="sr-badge">⋆⋆⋆ Artesanía en Paracord ⋆⋆⋆</span>
+            <h1 className="sr-title">
+              Tejido<br />
+              <span className="sr-gradient">Cobra</span>
+            </h1>
+            <p className="sr-desc">
+              Cuerda militar 550 · Hecho a mano · Cada pieza es única
+            </p>
           </div>
         </section>
 
-        {/* VISOR 3D */}
-        <section className="visor-section" id="visor">
-          <div className="section-label">⟐ VISOR INTERACTIVO</div>
-          <h2 className="section-title">Gira · Acerca · Inspecciona</h2>
-          <p className="section-desc">
-            Arrastra para ver la pulsera desde cualquier ángulo. Cambia de color
-            para ver todas las variantes disponibles.
-          </p>
-          <ProductViewer />
+        {/* Showroom 3D — el corazón */}
+        <section className="sr-viewer-section" id="showroom">
+          <div className="sr-viewer-wrap">
+            <Showroom />
+          </div>
         </section>
 
-        {/* PRODUCTOS */}
-        <section className="products-section" id="productos">
-          <div className="section-label">⟐ CATÁLOGO</div>
-          <h2 className="section-title">Nuestras pulseras</h2>
-          <div className="products-grid">
-            {products.map((p, i) => (
-              <div
-                key={p.name}
-                className={`product-card ${p.popular ? 'popular' : ''}`}
-              >
-                {p.popular && <span className="badge">Más vendido</span>}
-                <div className="product-visual">
-                  <div className="product-ring" style={{ animationDelay: `${i * 0.1}s` }} />
+        {/* Galería de colores sutil */}
+        <section className="sr-colors-section">
+          <div className="sr-colors-inner">
+            <h2 className="sr-section-title">Variantes</h2>
+            <p className="sr-section-desc">
+              Cada color disponible en todos los tejidos
+            </p>
+            <div className="sr-color-bar">
+              {SHOWROOM_COLORS.map((c) => (
+                <div
+                  key={c.value}
+                  className="sr-color-chip"
+                  title={c.name}
+                >
+                  <div
+                    className="sr-color-dot"
+                    style={{ backgroundColor: c.value }}
+                  />
+                  <span className="sr-color-name">{c.name}</span>
                 </div>
-                <div className="product-info">
-                  <h3 className="product-name">{p.name}</h3>
-                  <p className="product-desc">{p.desc}</p>
-                  <span className="product-colors">{p.colors} colores</span>
-                  <div className="product-bottom">
-                    <span className="product-price">{p.price}</span>
-                    <button className="btn-buy" onClick={() => setSelectedProduct(i)}>Comprar</button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Tejidos disponibles */}
+        <section className="sr-weaves-section">
+          <div className="sr-weaves-inner">
+            <h2 className="sr-section-title">Tejidos</h2>
+            <p className="sr-section-desc">
+              Técnicas artesanales tradicionales
+            </p>
+            <div className="sr-weave-grid">
+              {[
+                { name: 'Cobra', desc: 'El clásico. Nudo sencillo, limpio y resistente.' },
+                { name: 'King Cobra', desc: 'Doble capa. Mayor grosor y durabilidad.' },
+                { name: 'Dragon Scale', desc: 'Escamado decorativo. Textura única.' },
+                { name: 'Trident', desc: 'Tres cabos. Diseño audaz y simétrico.' },
+                { name: 'Solomon Bar', desc: 'Tejido plano. Ideal para diseños minimalistas.' },
+                { name: 'Fishtail', desc: 'Espina de pescado. Trenzado fino y elegante.' },
+              ].map((w) => (
+                <div key={w.name} className="sr-weave-card">
+                  <div className="sr-weave-visual">
+                    <div className="sr-weave-ring" />
                   </div>
+                  <h3 className="sr-weave-name">{w.name}</h3>
+                  <p className="sr-weave-desc">{w.desc}</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="footer" id="contacto">
-          <div className="footer-inner">
-            <div className="footer-brand">
-              <span className="logo">⟐ PARACORD</span>
-              <p>Cuerda militar 550 · Hecho a mano · Envíos a todo México</p>
-            </div>
-            <div className="footer-links">
-              <a href="#inicio">Inicio</a>
-              <a href="#visor">Visor 3D</a>
-              <a href="#productos">Catálogo</a>
-            </div>
-            <div className="footer-contact">
-              <p>hola@paracord.mx</p>
-              <p>IG: @paracord.mx</p>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            ⟐ PARACORD — Artesanía en paracord desde México
+        {/* Footer mínimo */}
+        <footer className="sr-footer">
+          <div className="sr-footer-inner">
+            <span className="sr-logo">⟐ PARACORD</span>
+            <p>Paracord 550 · Hecho a mano en México</p>
           </div>
         </footer>
       </div>
